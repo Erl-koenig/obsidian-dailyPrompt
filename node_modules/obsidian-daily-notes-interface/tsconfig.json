@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "module": "ESNext",
+    "target": "esnext",
+    "moduleResolution": "node",
+    "lib": ["dom", "es2020"],
+    "types": ["node", "jest"]
+  },
+  "include": ["**/*.ts"]
+}
