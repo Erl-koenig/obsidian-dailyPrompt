@@ -4,7 +4,8 @@
 This Obsidian plugin allows you to set up daily prompts and automatically fill them into your daily notes.
 
 ## Demo
-![A demo of the plugin working](demo.gif)
+https://github.com/Erl-koenig/obsidian-dailyPrompt/assets/68387388/fb1b117f-4d65-408d-8486-abf736886ad4
+
 
 
 ## Features
