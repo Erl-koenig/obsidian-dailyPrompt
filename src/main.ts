@@ -41,7 +41,7 @@ export default class DailyPromptPlugin extends Plugin {
 		this.settings = Object.assign(
 			{},
 			DEFAULT_SETTINGS,
-			await this.loadData()
+			await this.loadData(),
 		);
 		console.log("Daily Prompt plugin loaded");
 
@@ -68,7 +68,7 @@ export default class DailyPromptPlugin extends Plugin {
 			cta: "Accept",
 			onAccept: async (answers: string[]) => {
 				console.log("Prompt accepted with answers:", answers);
-                this.fillDailyNote(answers);
+				this.fillDailyNote(answers);
 			},
 			onCancel: () => {
 				console.log("Prompt canceled");
@@ -80,25 +80,31 @@ export default class DailyPromptPlugin extends Plugin {
 	}
 
 	async fillDailyNote(answers: string[]) {
-        const date = moment();
-        const dailyNotes = getAllDailyNotes();
+		const date = moment();
+		const dailyNotes = getAllDailyNotes();
 		let dailyNote = getDailyNote(date, dailyNotes);
 
 		if (!dailyNote) {
 			dailyNote = await createDailyNote(date);
 		}
 
-        var resultString = "";
-        for (var i = 0; i < this.settings.questions.length; i++) {
-            resultString += "**" + this.settings.questions[i] + "**\n" + this.settings.linePrefix + answers[i] + "\n\n";
-        }
+		let resultString = "";
+		for (let i = 0; i < this.settings.questions.length; i++) {
+			resultString +=
+				"**" +
+				this.settings.questions[i] +
+				"**\n" +
+				this.settings.linePrefix +
+				answers[i] +
+				"\n\n";
+		}
 
-        await updateSection(
-            this.app,
-            dailyNote,
-            this.settings.promptSectionHeading,
-            resultString
-          );
+		await updateSection(
+			this.app,
+			dailyNote,
+			this.settings.promptSectionHeading,
+			resultString,
+		);
 	}
 }
 
@@ -124,7 +130,7 @@ class DailyPromptSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Prompt section heading")
 			.setDesc(
-				"Defint the heading to use for the prompts. NOTE: Must be unique for every daily note."
+				"Defint the heading to use for the prompts. NOTE: Must be unique for every daily note.",
 			)
 			.addText((text) =>
 				text
@@ -137,12 +143,12 @@ class DailyPromptSettingsTab extends PluginSettingTab {
 							plugin.settings.promptSectionHeading = value;
 						}
 						plugin.saveData(plugin.settings);
-					})
+					}),
 			);
 		new Setting(containerEl)
 			.setName("Line prefix")
 			.setDesc(
-				"Prefix for each new line, include the trailing spaces. Examples: `- ` for lists or `- [ ] ` for tasks."
+				"Prefix for each new line, include the trailing spaces. Examples: `- ` for lists or `- [ ] ` for tasks.",
 			)
 			.addText((text) =>
 				text
@@ -151,7 +157,7 @@ class DailyPromptSettingsTab extends PluginSettingTab {
 					.onChange((value) => {
 						plugin.settings.linePrefix = value;
 						plugin.saveData(plugin.settings);
-					})
+					}),
 			);
 
 		containerEl.createEl("h3", {
@@ -177,7 +183,7 @@ class DailyPromptSettingsTab extends PluginSettingTab {
 					text.setValue(question).onChange(async (value) => {
 						plugin.settings.questions[i] = value;
 						plugin.saveData(plugin.settings);
-					})
+					}),
 				);
 
 			const removeButton = containerEl.createEl("button", {
