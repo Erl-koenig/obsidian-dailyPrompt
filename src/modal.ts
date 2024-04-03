@@ -33,8 +33,6 @@ export class ConfirmationModal extends Modal {
 				.setPlaceholder("Your Answer")
 				.onChange(() => this.updateAcceptButton());
 
-			input.inputEl.style.width = "100%";
-
 			contentEl.appendChild(textEl);
 			contentEl.appendChild(document.createElement("br"));
 			contentEl.appendChild(inputContainer);
@@ -52,24 +50,23 @@ export class ConfirmationModal extends Modal {
 	private updateAcceptButton() {
 		const allInputs = this.contentEl.querySelectorAll("input");
 		const isAllFilled = Array.from(allInputs).every(
-			(input: HTMLInputElement) => input.value.trim() !== ""
+			(input: HTMLInputElement) => input.value.trim() !== "",
 		);
-	
+
 		const acceptBtnEl = this.modalEl.getElementsByClassName(
-			"mod-cta"
+			"mod-cta",
 		)[1] as HTMLButtonElement;
-	
+
 		if (isAllFilled) {
 			acceptBtnEl.removeAttribute("disabled");
 		} else {
 			acceptBtnEl.setAttribute("disabled", "true");
 		}
 	}
-	
 
 	private addButtons(cta: string) {
 		const buttonContainerEl = this.contentEl.createDiv(
-			"modal-button-container"
+			"modal-button-container",
 		);
 		const cancelBtnEl = buttonContainerEl.createEl("button", {
 			text: "Cancel",
@@ -88,7 +85,7 @@ export class ConfirmationModal extends Modal {
 			e.preventDefault();
 			const allInputs = this.contentEl.querySelectorAll("input");
 			const answers = Array.from(allInputs).map((input) =>
-				input.value.trim()
+				input.value.trim(),
 			);
 			this.accepted = true;
 			this.close();
