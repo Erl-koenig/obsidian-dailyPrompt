@@ -1,19 +1,17 @@
-
 # Daily Prompt Plugin
 
 This Obsidian plugin allows you to set up daily prompts and automatically fill them into your daily notes.
 
 ## Demo
+
 https://github.com/Erl-koenig/obsidian-dailyPrompt/assets/68387388/fb1b117f-4d65-408d-8486-abf736886ad4
-
-
 
 ## Features
 
-- Define a set of prompts for each day.
-- Automatically fill prompts into your daily notes.
-    - Creates a daily note if it doesn't already exist.
-- Customize prompt section heading and line prefix.
+-   Define a set of prompts for each day.
+-   Automatically fill prompts into your daily notes.
+    -   Creates a daily note if it doesn't already exist.
+-   Customize prompt section heading and line prefix.
 
 ## Usage
 
@@ -50,3 +48,5 @@ This plugin is developed by [Erl-koenig](https://github.com/Erl-koenig).
 If you find this plugin helpful, consider supporting its development
 
 [<img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="BuyMeACoffee" width="100">](https://www.buymeacoffee.com/erlkoenig)
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/Erl-koenig?style=social)](https://github.com/sponsors/Erl-koenig)

@@ -19,6 +19,8 @@ interface IReviewSettings {
 	dailyNotesFolder: string;
 	promptSectionHeading: string;
 	linePrefix: string;
+	includeQuestions: boolean;
+	questionStyle: "Bold" | "No style";
 }
 
 const DEFAULT_SETTINGS: IReviewSettings = {
@@ -26,6 +28,8 @@ const DEFAULT_SETTINGS: IReviewSettings = {
 	dailyNotesFolder: "",
 	promptSectionHeading: "## Prompts",
 	linePrefix: "",
+	includeQuestions: true,
+	questionStyle: "Bold",
 };
 
 declare global {
@@ -45,7 +49,6 @@ export default class DailyPromptPlugin extends Plugin {
 		);
 		console.log("Daily Prompt plugin loaded");
 
-		// Command
 		this.addCommand({
 			id: "open-prompt",
 			name: "Open prompt",
@@ -59,7 +62,6 @@ export default class DailyPromptPlugin extends Plugin {
 		console.log("Daily Prompt Plugin unloaded");
 	}
 
-	// Open the prompt
 	async openPrompt(): Promise<void> {
 		const questions = this.settings.questions
 			.map((question: any) => `${question}`)
@@ -90,15 +92,16 @@ export default class DailyPromptPlugin extends Plugin {
 
 		let resultString = "";
 		for (let i = 0; i < this.settings.questions.length; i++) {
-			resultString +=
-				"**" +
-				this.settings.questions[i] +
-				"**\n" +
-				this.settings.linePrefix +
-				answers[i] +
-				"\n\n";
+			const question = this.settings.questions[i];
+			if (this.settings.includeQuestions) {
+				if (this.settings.questionStyle === "Bold") {
+					resultString += "**" + question + "**\n";
+				} else {
+					resultString += question + "\n";
+				}
+			}
+			resultString += this.settings.linePrefix + answers[i] + "\n\n";
 		}
-
 		await updateSection(
 			this.app,
 			dailyNote,
@@ -159,7 +162,29 @@ class DailyPromptSettingsTab extends PluginSettingTab {
 						plugin.saveData(plugin.settings);
 					}),
 			);
-
+		new Setting(containerEl)
+			.setName("Include Questions")
+			.setDesc("Decide if questions will be written to the daily note.")
+			.addToggle((toggle) => {
+				toggle.setValue(plugin.settings.includeQuestions);
+				toggle.onChange((value) => {
+					plugin.settings.includeQuestions = value;
+					plugin.saveData(plugin.settings);
+				});
+			});
+		new Setting(containerEl)
+			.setName("Questions style")
+			.setDesc("Decide in what style the questions should be displayed.")
+			.addDropdown((dropdown) => {
+				dropdown.addOption("Bold", "Bold (**)");
+				dropdown.addOption("No style", "No style");
+				dropdown
+					.setValue(plugin.settings.questionStyle)
+					.onChange(async (value) => {
+						plugin.settings.questionStyle = value;
+						plugin.saveData(plugin.settings);
+					});
+			});
 		containerEl.createEl("h3", {
 			text: "Prompts",
 		});
@@ -185,6 +210,25 @@ class DailyPromptSettingsTab extends PluginSettingTab {
 						plugin.saveData(plugin.settings);
 					}),
 				);
+
+			/*
+			  new Setting(containerEl)
+				.setName("Field Type")
+				.addDropdown((dropdown) => {
+					dropdown.addOption("Text", "Text");
+					dropdown.addOption("Number", "Number");
+					dropdown.addOption("Boolean", "Boolean");
+					dropdown.addOption("Images", "Images");
+					dropdown.addOption("JSON", "JSON");
+
+					dropdown
+						.setValue(question.fieldType)
+						.onChange(async (value) => {
+							question.fieldType = value;
+							plugin.saveData(plugin.settings);
+						});
+				}); 
+			*/
 
 			const removeButton = containerEl.createEl("button", {
 				text: "Remove",
