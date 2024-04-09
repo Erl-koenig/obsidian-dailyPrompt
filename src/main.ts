@@ -13,9 +13,10 @@ import {
 	getAllDailyNotes,
 	getDailyNote,
 } from "obsidian-daily-notes-interface";
+import { fieldType } from "./types";
 
 interface IReviewSettings {
-	questions: string[];
+	questions: [string, fieldType][];
 	dailyNotesFolder: string;
 	promptSectionHeading: string;
 	linePrefix: string;
@@ -24,7 +25,7 @@ interface IReviewSettings {
 }
 
 const DEFAULT_SETTINGS: IReviewSettings = {
-	questions: ["Example prompt"],
+	questions: [["Example prompt", fieldType.Text]],
 	dailyNotesFolder: "",
 	promptSectionHeading: "## Prompts",
 	linePrefix: "",
@@ -64,7 +65,7 @@ export default class DailyPromptPlugin extends Plugin {
 
 	async openPrompt(): Promise<void> {
 		const questions = this.settings.questions
-			.map((question: any) => `${question}`)
+			.map(([question, _]) => question) // Extract only the question strings
 			.join("\n");
 		new ConfirmationModal(this.app, {
 			cta: "Accept",
@@ -92,7 +93,7 @@ export default class DailyPromptPlugin extends Plugin {
 
 		let resultString = "";
 		for (let i = 0; i < this.settings.questions.length; i++) {
-			const question = this.settings.questions[i];
+			const question = this.settings.questions[i][0];
 			if (this.settings.includeQuestions) {
 				if (this.settings.questionStyle === "Bold") {
 					resultString += "**" + question + "**\n";
@@ -100,8 +101,26 @@ export default class DailyPromptPlugin extends Plugin {
 					resultString += question + "\n";
 				}
 			}
-			resultString += this.settings.linePrefix + answers[i] + "\n\n";
+			switch (this.settings.questions[i][1]) {
+				case fieldType.Note:
+					resultString += "[[" + answers[i] + "]]" + "\n\n";
+					break;
+				case fieldType.EmbeddedNoteFile:
+					resultString += "![[" + answers[i] + "]]" + "\n\n";
+					break;
+				case fieldType.Checkbox:
+					resultString +=
+						this.settings.linePrefix +
+						(answers[i] == "true" ? "Yes" : "No") +
+						"\n\n";
+					break;
+				default:
+					resultString +=
+						this.settings.linePrefix + answers[i] + "\n\n";
+					break;
+			}
 		}
+
 		await updateSection(
 			this.app,
 			dailyNote,
@@ -120,7 +139,7 @@ class DailyPromptSettingsTab extends PluginSettingTab {
 	}
 
 	display(): void {
-		let { containerEl } = this;
+		const { containerEl } = this;
 		const plugin: any = (this as any).plugin;
 
 		containerEl.empty();
@@ -133,7 +152,7 @@ class DailyPromptSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Prompt section heading")
 			.setDesc(
-				"Defint the heading to use for the prompts. NOTE: Must be unique for every daily note.",
+				"Define the heading to use for the prompts. NOTE: Must be unique for every daily note.",
 			)
 			.addText((text) =>
 				text
@@ -193,54 +212,61 @@ class DailyPromptSettingsTab extends PluginSettingTab {
 			.setDesc("Add and edit new prompts here")
 			.addButton((button: ButtonComponent) => {
 				button.setButtonText("Add prompt").onClick(() => {
-					plugin.settings.questions.push("");
+					plugin.settings.questions.push(["", "Text"]);
 					plugin.saveData(plugin.settings);
 					this.display();
 				});
 			});
-
 		for (let i = 0; i < plugin.settings.questions.length; i++) {
-			const question = plugin.settings.questions[i];
+			const [question, fieldType] = plugin.settings.questions[i];
+			const createSetting = (questionIndex: number) => {
+				new Setting(containerEl)
+					.setName("Prompt #" + (questionIndex + 1))
+					.addText((text) =>
+						text
+							.setValue(
+								plugin.settings.questions[questionIndex][0],
+							)
+							.onChange(async (value) => {
+								plugin.settings.questions[questionIndex][0] =
+									value;
+								plugin.saveData(plugin.settings);
+							}),
+					)
+					.addDropdown((dropdown) =>
+						dropdown
+							.addOption(fieldType.Text, "Text")
+							.addOption(fieldType.Note, "Note")
+							.addOption(
+								fieldType.EmbeddedNoteFile,
+								"Embedded Note / File",
+							)
+							.addOption(fieldType.Checkbox, "Checkbox")
+							.addOption(fieldType.TextArea, "Text area")
+							.addOption(fieldType.Slider, "Slider")
+							// .addOption(fieldType.OptionSet, "Option Set")
+							.setValue(fieldType)
+							.onChange(async (value) => {
+								plugin.settings.questions[questionIndex][1] =
+									value;
+								plugin.saveData(plugin.settings);
+							}),
+					);
+				const removeButton = containerEl.createEl("button", {
+					text: "Remove",
+					cls: "mod-cta",
+				});
 
-			new Setting(containerEl)
-				.setName("Prompt #" + (i + 1))
-				.addText((text) =>
-					text.setValue(question).onChange(async (value) => {
-						plugin.settings.questions[i] = value;
-						plugin.saveData(plugin.settings);
-					}),
-				);
+				removeButton.addEventListener("click", () => {
+					plugin.settings.questions.splice(questionIndex, 1);
+					plugin.saveData(plugin.settings);
+					this.display();
+				});
+				containerEl.createEl("br");
+				containerEl.createEl("br");
+			};
 
-			/*
-			  new Setting(containerEl)
-				.setName("Field Type")
-				.addDropdown((dropdown) => {
-					dropdown.addOption("Text", "Text");
-					dropdown.addOption("Number", "Number");
-					dropdown.addOption("Boolean", "Boolean");
-					dropdown.addOption("Images", "Images");
-					dropdown.addOption("JSON", "JSON");
-
-					dropdown
-						.setValue(question.fieldType)
-						.onChange(async (value) => {
-							question.fieldType = value;
-							plugin.saveData(plugin.settings);
-						});
-				}); 
-			*/
-
-			const removeButton = containerEl.createEl("button", {
-				text: "Remove",
-				cls: "mod-cta",
-			});
-			removeButton.addEventListener("click", () => {
-				plugin.settings.questions.splice(i, 1);
-				plugin.saveData(plugin.settings);
-				this.display();
-			});
-			containerEl.createEl("br");
-			containerEl.createEl("br");
+			createSetting(i);
 		}
 	}
 }

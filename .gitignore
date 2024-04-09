@@ -5,6 +5,9 @@
 *.iml
 .idea
 
+# data.json generated from obsidian settings
+data.json
+
 # npm
 node_modules
 

@@ -10,3 +10,14 @@ If your plugin does not need CSS, delete this file.
 input {
 	width: 100%;
 }
+textarea {
+	width: 100%;
+}
+input[type="range"] {
+	width: 100%;
+}
+.sliderValue {
+	margin: 0 auto;
+	display: block;
+	width: 40px;
+}

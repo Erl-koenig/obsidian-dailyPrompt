@@ -1,4 +1,13 @@
-import { App, Modal, TextComponent } from "obsidian";
+import {
+	App,
+	// DropdownComponent,
+	Modal,
+	SliderComponent,
+	TextComponent,
+	TextAreaComponent,
+	ToggleComponent,
+} from "obsidian";
+import { fieldType } from "./types";
 
 interface IConfirmationDialogParams {
 	cta: string;
@@ -6,7 +15,7 @@ interface IConfirmationDialogParams {
 	onCancel?: () => void;
 	text: string;
 	title: string;
-	settings: string[];
+	questions: [string, fieldType][];
 }
 export class ConfirmationModal extends Modal {
 	private config: IConfirmationDialogParams;
@@ -24,14 +33,71 @@ export class ConfirmationModal extends Modal {
 		const contentEl = this.contentEl.createDiv();
 
 		for (let i = 0; i < settings.length; i++) {
-			const question = settings[i];
+			const question = settings[i][0];
+			const type = settings[i][1];
 			const textEl = contentEl.createEl("div", { text: question });
 
 			const inputContainer = contentEl.createEl("div");
+			switch (type) {
+				case fieldType.Text:
+					new TextComponent(inputContainer)
+						.setPlaceholder("Your Answer")
+						.onChange(() => this.updateAcceptButton());
+					break;
+				case fieldType.Checkbox:
+					new ToggleComponent(inputContainer).onChange(() =>
+						this.updateAcceptButton(),
+					);
+					break;
+				case fieldType.EmbeddedNoteFile:
+				case fieldType.Note:
+					new TextComponent(inputContainer)
+						.setPlaceholder("Enter the name of the note")
+						.onChange(() => this.updateAcceptButton());
+					break;
+				case fieldType.TextArea:
+					new TextAreaComponent(inputContainer)
+						.setPlaceholder("Your answer")
+						.onChange(() => this.updateAcceptButton());
+					break;
+				// case fieldType.OptionSet:
+				// 	new DropdownComponent(inputContainer);
+				// 	break;
+				case fieldType.Slider: {
+					const currentValueElement = document.createElement("input");
+					currentValueElement.classList.add("sliderValue");
+					currentValueElement.type = "number"; // Change input type to number
+					currentValueElement.value = "50"; // Set default value
+					currentValueElement.addEventListener("input", (event) => {
+						const value = parseInt(event.target.value);
+						slider.setValue(value); // Update slider value
+						this.updateAcceptButton();
+					});
+					inputContainer.appendChild(currentValueElement);
 
-			const input = new TextComponent(inputContainer)
-				.setPlaceholder("Your Answer")
-				.onChange(() => this.updateAcceptButton());
+					const sliderWrapper = document.createElement("div");
+					inputContainer.appendChild(sliderWrapper);
+
+					const slider = new SliderComponent(sliderWrapper)
+						.setValue(50)
+						.onChange((value) => {
+							currentValueElement.value = value.toString();
+							this.updateAcceptButton();
+						});
+
+					const sliderInput = sliderWrapper.querySelector(
+						"input[type='range']",
+					);
+					sliderInput.addEventListener("input", (event) => {
+						const value = parseInt(event.target.value);
+						currentValueElement.value = value.toString();
+						this.updateAcceptButton();
+					});
+					break;
+				}
+				default:
+					throw new Error(`Unhandled fieldType: ${fieldType}`);
+			}
 
 			contentEl.appendChild(textEl);
 			contentEl.appendChild(document.createElement("br"));
@@ -48,7 +114,7 @@ export class ConfirmationModal extends Modal {
 	}
 
 	private updateAcceptButton() {
-		const allInputs = this.contentEl.querySelectorAll("input");
+		const allInputs = this.contentEl.querySelectorAll("input, textarea");
 		const isAllFilled = Array.from(allInputs).every(
 			(input: HTMLInputElement) => input.value.trim() !== "",
 		);
@@ -83,10 +149,28 @@ export class ConfirmationModal extends Modal {
 
 		acceptBtnEl.addEventListener("click", async (e) => {
 			e.preventDefault();
-			const allInputs = this.contentEl.querySelectorAll("input");
-			const answers = Array.from(allInputs).map((input) =>
-				input.value.trim(),
+			const allInputs = this.contentEl.querySelectorAll(
+				"input:not(.sliderValue), textarea",
 			);
+			const answers = Array.from(allInputs).map((input) => {
+				let value;
+				if (input.type === "checkbox") {
+					const parentDiv = input.closest(".checkbox-container");
+					// Must check the parent div's class, because the input property doesn't update on change
+					if (
+						parentDiv &&
+						parentDiv.classList.contains("is-enabled")
+					) {
+						value = "true";
+					} else {
+						value = "false";
+					}
+				} else {
+					value = input.value.trim();
+				}
+				return value;
+			});
+
 			this.accepted = true;
 			this.close();
 			this.config.onAccept(answers);
