@@ -1,6 +1,6 @@
-import moment from "moment";
 import {
 	Plugin,
+	moment,
 	App,
 	PluginSettingTab,
 	Setting,
@@ -70,7 +70,6 @@ export default class DailyPromptPlugin extends Plugin {
 		new ConfirmationModal(this.app, {
 			cta: "Accept",
 			onAccept: async (answers: string[]) => {
-				console.log("Prompt accepted with answers:", answers);
 				this.fillDailyNote(answers);
 			},
 			onCancel: () => {
@@ -144,11 +143,6 @@ class DailyPromptSettingsTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl("h2", { text: "Daily Prompt" });
-
-		containerEl.createEl("h3", {
-			text: "General settings",
-		});
 		new Setting(containerEl)
 			.setName("Prompt section heading")
 			.setDesc(
@@ -182,7 +176,7 @@ class DailyPromptSettingsTab extends PluginSettingTab {
 					}),
 			);
 		new Setting(containerEl)
-			.setName("Include Questions")
+			.setName("Include questions")
 			.setDesc("Decide if questions will be written to the daily note.")
 			.addToggle((toggle) => {
 				toggle.setValue(plugin.settings.includeQuestions);
@@ -204,9 +198,7 @@ class DailyPromptSettingsTab extends PluginSettingTab {
 						plugin.saveData(plugin.settings);
 					});
 			});
-		containerEl.createEl("h3", {
-			text: "Prompts",
-		});
+		new Setting(containerEl).setName("Prompts").setHeading();
 		new Setting(containerEl)
 			.setName("Prompts")
 			.setDesc("Add and edit new prompts here")
