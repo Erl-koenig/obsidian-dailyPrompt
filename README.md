@@ -4,7 +4,7 @@ This Obsidian plugin allows you to set up daily prompts and automatically fill t
 
 ## Demo
 
-https://github.com/Erl-koenig/obsidian-dailyPrompt/assets/68387388/fb1b117f-4d65-408d-8486-abf736886ad4
+https://github.com/Erl-koenig/obsidian-dailyPrompt/assets/68387388/8f603cb1-34eb-4563-a8cf-54a1d4d93f6d
 
 ## Features
 
