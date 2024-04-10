@@ -40,25 +40,23 @@ export class ConfirmationModal extends Modal {
 			const inputContainer = contentEl.createEl("div");
 			switch (type) {
 				case fieldType.Text:
-					new TextComponent(inputContainer)
-						.setPlaceholder("Your Answer")
-						.onChange(() => this.updateAcceptButton());
+					new TextComponent(inputContainer).setPlaceholder(
+						"Your Answer",
+					);
 					break;
 				case fieldType.Checkbox:
-					new ToggleComponent(inputContainer).onChange(() =>
-						this.updateAcceptButton(),
-					);
+					new ToggleComponent(inputContainer);
 					break;
 				case fieldType.EmbeddedNoteFile:
 				case fieldType.Note:
-					new TextComponent(inputContainer)
-						.setPlaceholder("Enter the name of the note")
-						.onChange(() => this.updateAcceptButton());
+					new TextComponent(inputContainer).setPlaceholder(
+						"Enter the name of the note",
+					);
 					break;
 				case fieldType.TextArea:
-					new TextAreaComponent(inputContainer)
-						.setPlaceholder("Your answer")
-						.onChange(() => this.updateAcceptButton());
+					new TextAreaComponent(inputContainer).setPlaceholder(
+						"Your answer",
+					);
 					break;
 				// case fieldType.OptionSet:
 				// 	new DropdownComponent(inputContainer);
@@ -71,7 +69,6 @@ export class ConfirmationModal extends Modal {
 					currentValueElement.addEventListener("input", (event) => {
 						const value = parseInt(event.target.value);
 						slider.setValue(value); // Update slider value
-						this.updateAcceptButton();
 					});
 					inputContainer.appendChild(currentValueElement);
 
@@ -82,7 +79,6 @@ export class ConfirmationModal extends Modal {
 						.setValue(50)
 						.onChange((value) => {
 							currentValueElement.value = value.toString();
-							this.updateAcceptButton();
 						});
 
 					const sliderInput = sliderWrapper.querySelector(
@@ -91,7 +87,6 @@ export class ConfirmationModal extends Modal {
 					sliderInput.addEventListener("input", (event) => {
 						const value = parseInt(event.target.value);
 						currentValueElement.value = value.toString();
-						this.updateAcceptButton();
 					});
 					break;
 				}
@@ -113,22 +108,24 @@ export class ConfirmationModal extends Modal {
 		this.addButtons(cta);
 	}
 
-	private updateAcceptButton() {
-		const allInputs = this.contentEl.querySelectorAll("input, textarea");
-		const isAllFilled = Array.from(allInputs).every(
-			(input: HTMLInputElement) => input.value.trim() !== "",
-		);
-
-		const acceptBtnEl = this.modalEl.getElementsByClassName(
-			"mod-cta",
-		)[1] as HTMLButtonElement;
-
-		if (isAllFilled) {
-			acceptBtnEl.removeAttribute("disabled");
-		} else {
-			acceptBtnEl.setAttribute("disabled", "true");
-		}
-	}
+	// updateAcceptButton() {
+	// 	const allInputs = this.contentEl.querySelectorAll(
+	// 		"input:not(.slider), input[type='checkbox'], textarea",
+	// 	);
+	// 	const isAllFilled = Array.from(allInputs).every(
+	// 		(input: HTMLInputElement) => input.value.trim() !== "",
+	// 	);
+	//
+	// 	const acceptBtnEl = this.modalEl.getElementsByClassName(
+	// 		"mod-cta",
+	// 	)[1] as HTMLButtonElement;
+	//
+	// 	if (isAllFilled) {
+	// 		acceptBtnEl.removeAttribute("disabled");
+	// 	} else {
+	// 		acceptBtnEl.setAttribute("disabled", "true");
+	// 	}
+	// }
 
 	private addButtons(cta: string) {
 		const buttonContainerEl = this.contentEl.createDiv(
@@ -142,9 +139,6 @@ export class ConfirmationModal extends Modal {
 		const acceptBtnEl = buttonContainerEl.createEl("button", {
 			cls: "mod-cta",
 			text: cta,
-			attr: {
-				disabled: "true",
-			},
 		});
 
 		acceptBtnEl.addEventListener("click", async (e) => {
