@@ -5,6 +5,7 @@ import {
 	PluginSettingTab,
 	Setting,
 	ButtonComponent,
+	editorInfoField,
 } from "obsidian";
 import { ConfirmationModal } from "./modal";
 import { updateSection } from "./fileUtils";
@@ -109,11 +110,14 @@ export default class DailyPromptPlugin extends Plugin {
 					break;
 				case fieldType.Checkbox:
 					resultString +=
-						this.settings.linePrefix +
-						(answers[i] == "true" ? "Yes" : "No") +
-						"\n\n";
+						(answers[i] == "true" ? "Yes" : "No") + "\n\n";
+					break;
+				case fieldType.Slider:
+				case fieldType.TextArea:
+					resultString += answers[i] + "\n\n";
 					break;
 				default:
+					// The remaining field types (text)
 					resultString +=
 						this.settings.linePrefix + answers[i] + "\n\n";
 					break;
@@ -164,7 +168,7 @@ class DailyPromptSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Line prefix")
 			.setDesc(
-				"Prefix for each new line, include the trailing spaces. Examples: `- ` for lists or `- [ ] ` for tasks.",
+				"Prefix for each new line, include the trailing spaces. Only works for field type text. Examples: `- ` for lists or `- [ ] ` for tasks.",
 			)
 			.addText((text) =>
 				text

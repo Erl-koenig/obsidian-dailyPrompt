@@ -9,6 +9,7 @@ https://github.com/Erl-koenig/obsidian-dailyPrompt/assets/68387388/fb1b117f-4d65
 ## Features
 
 -   Define a set of prompts for each day.
+    -   Specify the file type (Text, Note, Embedded Note / File, Checkbox, Text area, slider)
 -   Automatically fill prompts into your daily notes.
     -   Creates a daily note if it doesn't already exist.
 -   Customize prompt section heading and line prefix.
